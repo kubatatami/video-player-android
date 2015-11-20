@@ -15,32 +15,8 @@
  */
 package com.appunite.appunitevideoplayer;
 
-import com.appunite.appunitevideoplayer.R;
-import com.appunite.appunitevideoplayer.player.DashRendererBuilder;
-import com.appunite.appunitevideoplayer.player.DemoPlayer;
-import com.appunite.appunitevideoplayer.player.EventLogger;
-import com.appunite.appunitevideoplayer.player.ExtractorRendererBuilder;
-import com.appunite.appunitevideoplayer.player.HlsRendererBuilder;
-import com.appunite.appunitevideoplayer.player.SmoothStreamingRendererBuilder;
-import com.appunite.appunitevideoplayer.player.SmoothStreamingTestMediaDrmCallback;
-import com.appunite.appunitevideoplayer.player.WidevineTestMediaDrmCallback;
-import com.google.android.exoplayer.AspectRatioFrameLayout;
-import com.google.android.exoplayer.ExoPlayer;
-import com.google.android.exoplayer.MediaFormat;
-import com.google.android.exoplayer.audio.AudioCapabilities;
-import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
-import com.google.android.exoplayer.drm.UnsupportedDrmException;
-import com.google.android.exoplayer.metadata.GeobMetadata;
-import com.google.android.exoplayer.metadata.PrivMetadata;
-import com.google.android.exoplayer.metadata.TxxxMetadata;
-import com.google.android.exoplayer.text.CaptionStyleCompat;
-import com.google.android.exoplayer.text.Cue;
-import com.google.android.exoplayer.text.SubtitleLayout;
-import com.google.android.exoplayer.util.DebugTextViewHelper;
-import com.google.android.exoplayer.util.MimeTypes;
-import com.google.android.exoplayer.util.Util;
-import com.google.android.exoplayer.util.VerboseLogUtil;
-
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -66,6 +42,30 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.Toast;
+
+import com.appunite.appunitevideoplayer.R;
+import com.appunite.appunitevideoplayer.player.DashRendererBuilder;
+import com.appunite.appunitevideoplayer.player.DemoPlayer;
+import com.appunite.appunitevideoplayer.player.EventLogger;
+import com.appunite.appunitevideoplayer.player.ExtractorRendererBuilder;
+import com.appunite.appunitevideoplayer.player.HlsRendererBuilder;
+import com.appunite.appunitevideoplayer.player.SmoothStreamingRendererBuilder;
+import com.appunite.appunitevideoplayer.player.SmoothStreamingTestMediaDrmCallback;
+import com.appunite.appunitevideoplayer.player.WidevineTestMediaDrmCallback;
+import com.google.android.exoplayer.AspectRatioFrameLayout;
+import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.exoplayer.MediaFormat;
+import com.google.android.exoplayer.audio.AudioCapabilities;
+import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
+import com.google.android.exoplayer.drm.UnsupportedDrmException;
+import com.google.android.exoplayer.metadata.GeobMetadata;
+import com.google.android.exoplayer.metadata.PrivMetadata;
+import com.google.android.exoplayer.metadata.TxxxMetadata;
+import com.google.android.exoplayer.text.CaptionStyleCompat;
+import com.google.android.exoplayer.text.Cue;
+import com.google.android.exoplayer.text.SubtitleLayout;
+import com.google.android.exoplayer.util.MimeTypes;
+import com.google.android.exoplayer.util.Util;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -416,18 +416,31 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
         return true;
     }
 
+    private static final long ANIMATION_DURATION = 400;
+    private boolean mElementsHidden;
+
     private void toggleControlsVisibility() {
-        if (controllerView.getVisibility() == View.VISIBLE) {
-            controllerView.setVisibility(View.GONE);
-            toolbar.setVisibility(View.GONE);
-        } else {
+        if (mElementsHidden) {
             showControls();
+        } else {
+            toolbar.animate().translationY(-toolbar.getHeight()).setDuration(ANIMATION_DURATION).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mElementsHidden = true;
+                }
+            }).start();
+            controllerView.animate().translationY(controllerView.getHeight()).setDuration(ANIMATION_DURATION).start();
         }
     }
 
     private void showControls() {
-        toolbar.setVisibility(View.VISIBLE);
-        controllerView.setVisibility(View.VISIBLE);
+        toolbar.animate().translationY(0).setDuration(ANIMATION_DURATION).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mElementsHidden = false;
+            }
+        }).start();
+        controllerView.animate().translationY(0).setDuration(ANIMATION_DURATION).start();
     }
 
     // DemoPlayer.CaptionListener implementation
