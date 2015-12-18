@@ -43,7 +43,6 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.Toast;
 
-import com.appunite.appunitevideoplayer.R;
 import com.appunite.appunitevideoplayer.player.DashRendererBuilder;
 import com.appunite.appunitevideoplayer.player.DemoPlayer;
 import com.appunite.appunitevideoplayer.player.EventLogger;
@@ -123,6 +122,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     private AudioCapabilitiesReceiver audioCapabilitiesReceiver;
     private ViewGroup controllerView;
     private Toolbar toolbar;
+    private ViewGroup root;
 
     public static Intent getVideoPlayerIntent(@NonNull Context context,
                                               @NonNull final String videoUrl,
@@ -137,7 +137,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.player_activity);
-        View root = findViewById(R.id.root);
+        root = (ViewGroup) findViewById(R.id.root);
         root.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -441,6 +441,19 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
             }
         }).start();
         controllerView.animate().translationY(0).setDuration(ANIMATION_DURATION).start();
+    }
+
+    protected void hideControllerAndToolbar() {
+        controllerView.setVisibility(View.GONE);
+        toolbar.setVisibility(View.GONE);
+    }
+
+    protected ViewGroup getRoot() {
+        return root;
+    }
+
+    protected long getPlayerPosition() {
+        return player == null ? 0 : player.getCurrentPosition();
     }
 
     // DemoPlayer.CaptionListener implementation
