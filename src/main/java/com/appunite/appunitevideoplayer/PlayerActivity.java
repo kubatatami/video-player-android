@@ -111,7 +111,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
 
     private DemoPlayer player;
     private boolean playerNeedsPrepare;
-    public boolean isAdvertisement = true;
+    public boolean isAdvertisement = false;
 
     private long playerPosition;
     private boolean enableBackgroundAudio;
@@ -278,7 +278,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
             player.seekTo(playerPosition);
             playerNeedsPrepare = true;
             mediaController.setMediaPlayer(player.getPlayerControl());
-            mediaController.setEnabled(isAdvertisement);
+            mediaController.setEnabled(!isAdvertisement);
             eventLogger = new EventLogger();
             eventLogger.startSession();
             player.addListener(eventLogger);
@@ -445,8 +445,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     protected void setAdView() {
-        isAdvertisement = false;
-        mediaController.disableControlsForAd();
+        isAdvertisement = true;
+        mediaController.hidePauseButton();
         toolbar.setVisibility(View.GONE);
     }
 

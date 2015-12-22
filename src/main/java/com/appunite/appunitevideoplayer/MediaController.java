@@ -535,7 +535,7 @@ public class MediaController extends FrameLayout {
         }
     };
 
-    public void disableControlsForAd() {
+    public void hidePauseButton() {
         if (mPauseButton != null) {
             mPauseButton.setVisibility(View.GONE);
         }
