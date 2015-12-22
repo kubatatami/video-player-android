@@ -216,7 +216,7 @@ public class MediaController extends FrameLayout {
      */
     private void disableUnsupportedButtons() {
         try {
-            if (mPauseButton != null && !mPlayer.canPause()) {
+            if (mPauseButton != null && mPlayer != null &&!mPlayer.canPause()) {
                 mPauseButton.setEnabled(false);
             }
         } catch (IncompatibleClassChangeError ex) {
@@ -535,4 +535,9 @@ public class MediaController extends FrameLayout {
         }
     };
 
+    public void disableControlsForAd() {
+        if (mPauseButton != null) {
+            mPauseButton.setVisibility(View.GONE);
+        }
+    }
 }
