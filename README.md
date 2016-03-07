@@ -15,10 +15,10 @@ repositories {
 dependencies {
 
     // snapshot version
-    compile 'com.github.appunite.video-player-android:video-player:master-SNAPSHOT'
+    compile 'com.github.appunite:video-player-android:master-SNAPSHOT'
 
     // or use specific version
-    compile 'com.github.appunite.video-player-android:video-player:1.0.0'
+    compile 'com.github.appunite:video-player-android:1.0.0'
 }
 ```
 
