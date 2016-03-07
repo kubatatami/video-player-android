@@ -15,7 +15,9 @@
  */
 package com.appunite.appunitevideoplayer.player;
 
+import android.annotation.TargetApi;
 import android.media.MediaCodec.CryptoException;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -159,8 +161,13 @@ public class EventLogger implements DemoPlayer.Listener, DemoPlayer.InfoListener
   }
 
   @Override
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public void onCryptoError(CryptoException e) {
-    printInternalError("cryptoError", e);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      printInternalError("cryptoError", e);
+    } else {
+      printInternalError("cryptoError", new Exception());
+    }
   }
 
   @Override
