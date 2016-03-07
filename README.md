@@ -22,6 +22,14 @@ dependencies {
 }
 ```
 
+Start video
+
+```java
+startActivity(PlayerActivity.getVideoPlayerIntent(context,
+    "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8",
+    "Video title"));
+```
+
 
 # License
 
