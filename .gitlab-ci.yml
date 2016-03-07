@@ -1,0 +1,12 @@
+
+before_script:
+  - export VERSION_NAME="$(git describe --match 'v*.*.*' --always)-$(git rev-list HEAD --count)$(git status | grep 'clean' --quiet || echo '-draft')"
+  - printf "\norg.gradle.jvmargs=-XX:MaxPermSize=2g\ncommitId=${CI_BUILD_REF}\nversionName=${VERSION_NAME}\ndisablePreDex=true\n" >> gradle.properties
+
+build:
+  image: jacekmarchwicki/android:java7-r24-4-1
+  script:
+  - ./gradlew --parallel --stacktrace build
+  - python tools/upload.py --token dPQihQfpRmjIoWZ8w5JOUaqg --build-name "${VERSION_SUFFIX}" example/build/outputs/ video-player/build/outputs/
+  tags:
+  - docker
