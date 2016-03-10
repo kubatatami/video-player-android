@@ -216,6 +216,24 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
     private InternalErrorListener internalErrorListener;
     private InfoListener infoListener;
 
+    /**
+     * Only for backward compatibility (I think super user app uses it)
+     */
+    @Deprecated
+    public DemoPlayer(RendererBuilder rendererBuilder) {
+        player = ExoPlayer.Factory.newInstance(RENDERER_COUNT, 1000, 5000);
+        this.rendererBuilder = rendererBuilder;
+        player.addListener(this);
+        playerControl = new PlayerControl(player);
+        mainHandler = new Handler();
+        listeners = new CopyOnWriteArrayList<>();
+        lastReportedPlaybackState = STATE_IDLE;
+        rendererBuildingState = RENDERER_BUILDING_STATE_IDLE;
+        // Disable text initially.
+        player.setSelectedTrack(TYPE_TEXT, TRACK_DISABLED);
+    }
+
+
     public DemoPlayer() {
         player = ExoPlayer.Factory.newInstance(RENDERER_COUNT, 1000, 5000);
         player.addListener(this);
