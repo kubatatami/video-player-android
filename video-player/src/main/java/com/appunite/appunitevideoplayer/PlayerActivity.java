@@ -271,7 +271,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
 
     private void preparePlayer(boolean playWhenReady) {
         if (player == null) {
-            player = new DemoPlayer(getRendererBuilder());
+            player = new DemoPlayer();
+            player.setRendererBuilder(getRendererBuilder());
             player.addListener(this);
             player.setCaptionListener(this);
             player.setMetadataListener(this);
