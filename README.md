@@ -18,7 +18,7 @@ dependencies {
     compile 'com.github.appunite:video-player-android:master-SNAPSHOT'
 
     // or use specific version
-    compile 'com.github.appunite:video-player-android:1.0.0'
+    compile 'com.github.appunite:video-player-android:1.0.1'
 }
 ```
 
