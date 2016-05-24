@@ -669,4 +669,7 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
         }
     }
 
+    public boolean isPlaying() {
+        return playerControl.isPlaying();
+    }
 }

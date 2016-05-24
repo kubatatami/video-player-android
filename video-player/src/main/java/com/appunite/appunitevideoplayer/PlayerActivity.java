@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -39,6 +41,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.ProgressBar;
@@ -81,6 +84,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     public static final String CONTENT_TYPE_EXTRA = "content_type";
     public static final String VIDEO_URL_EXTRA = "video_url_extra";
     public static final String TITLE_TEXT_EXTRA = "title_text_extra";
+    public static final String PLAY_BUTTON_EXTRA = "play_button_extra";
 
     public static final int TYPE_DASH = 0;
     public static final int TYPE_SS = 1;
@@ -126,13 +130,24 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     private Toolbar toolbar;
     private ViewGroup root;
     private ProgressBar progressBar;
+    private ImageView playButton;
 
+    /**
+     *
+     * @param context
+     * @param videoUrl
+     * @param title
+     * @param playButtonRes put 0 when don't want to have play button in the center of screen
+     * @return
+     */
     public static Intent getVideoPlayerIntent(@NonNull Context context,
                                               @NonNull final String videoUrl,
-                                              @NonNull final String title) {
+                                              @NonNull final String title,
+                                              @DrawableRes final int playButtonRes) {
         return new Intent(context, PlayerActivity.class)
                 .putExtra(VIDEO_URL_EXTRA, videoUrl)
-                .putExtra(TITLE_TEXT_EXTRA, title);
+                .putExtra(TITLE_TEXT_EXTRA, title)
+                .putExtra(PLAY_BUTTON_EXTRA, playButtonRes);
     }
 
     @Override
@@ -175,11 +190,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
         toolbar.setTitle(getIntent().getStringExtra(TITLE_TEXT_EXTRA));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        finish();
-                    }
-                });
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         mediaController = new MediaController(this);
         mediaController.setAnchorView(root);
@@ -194,6 +209,18 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
         audioCapabilitiesReceiver.register();
 
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
+        playButton = (ImageView) findViewById(R.id.play_button_icon);
+        final int playButtonIconDrawableId = getIntent().getIntExtra(PLAY_BUTTON_EXTRA, 0);
+        if (playButtonIconDrawableId != 0) {
+            playButton.setImageDrawable(ContextCompat.getDrawable(this, playButtonIconDrawableId));
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    preparePlayer(true);
+                }
+            });
+        }
     }
 
     @Override
@@ -236,7 +263,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
         audioCapabilitiesReceiver.unregister();
         releasePlayer();
     }
-
 
     // AudioCapabilitiesReceiver.Listener methods
 
@@ -311,10 +337,48 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     public void onStateChanged(boolean playWhenReady, int playbackState) {
         if (playbackState == ExoPlayer.STATE_ENDED) {
             showControls();
+            rewind(false);
         }
         final boolean showProgress = playbackState == ExoPlayer.STATE_BUFFERING
                 || playbackState == ExoPlayer.STATE_PREPARING;
         progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
+
+        final boolean showPlayButton = !showProgress && !player.isPlaying();
+        animatePlayButton(showPlayButton);
+    }
+
+    private void rewind(boolean playWhenReady) {
+        if (player != null) {
+            playerPosition = 0L;
+            player.seekTo(playerPosition);
+            preparePlayer(playWhenReady);
+        }
+    }
+
+    private void animatePlayButton(boolean visible) {
+        if (visible) {
+            playButton.animate()
+                    .alpha(1.f)
+                    .setDuration(ANIMATION_DURATION_FAST)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            playButton.setVisibility(View.VISIBLE);
+                        }
+                    })
+                    .start();
+        } else {
+            playButton.animate()
+                    .alpha(0.f)
+                    .setDuration(ANIMATION_DURATION_FAST)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            playButton.setVisibility(View.GONE);
+                        }
+                    })
+                    .start();
+        }
     }
 
     @Override
@@ -378,7 +442,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
                     buildBitrateString(format)), buildTrackIdString(format));
         } else if (MimeTypes.isAudio(format.mimeType)) {
             trackName = joinWithSeparator(joinWithSeparator(joinWithSeparator(buildLanguageString(format),
-                            buildAudioPropertyString(format)), buildBitrateString(format)),
+                    buildAudioPropertyString(format)), buildBitrateString(format)),
                     buildTrackIdString(format));
         } else {
             trackName = joinWithSeparator(joinWithSeparator(buildLanguageString(format),
@@ -425,6 +489,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private static final long ANIMATION_DURATION = 400;
+    private static final long ANIMATION_DURATION_FAST = 100;
     private boolean mElementsHidden;
 
     private void toggleControlsVisibility() {
@@ -568,5 +633,4 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
             return TYPE_OTHER;
         }
     }
-
 }

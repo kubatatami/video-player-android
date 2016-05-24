@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         final VideoAdapter adapter = new VideoAdapter(new OnVideoClickListener() {
             @Override
             public void onVideoClick(@NonNull String item) {
-                startActivity(PlayerActivity.getVideoPlayerIntent(MainActivity.this, item, item));
+                startActivity(PlayerActivity.getVideoPlayerIntent(MainActivity.this, item, item, 0));
             }
         });
         recyclerView.setAdapter(adapter);
