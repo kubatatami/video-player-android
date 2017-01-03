@@ -1,5 +1,8 @@
 # Video player
 
+[![Build Status](https://travis-ci.org/appunite/video-player-android.svg?branch=master)](https://travis-ci.org/appunite/video-player-android)
+[![Release](https://jitpack.io/v/appunite/video-player-android.svg)](https://jitpack.io/#appunite/video-player-android)
+
 Easy to use video player
 
 # How to integrate with your project
