@@ -39,6 +39,7 @@ import com.google.android.exoplayer.dash.DashChunkSource;
 import com.google.android.exoplayer.drm.StreamingDrmSessionManager;
 import com.google.android.exoplayer.hls.HlsSampleSource;
 import com.google.android.exoplayer.metadata.MetadataTrackRenderer.MetadataRenderer;
+import com.google.android.exoplayer.metadata.id3.Id3Frame;
 import com.google.android.exoplayer.text.Cue;
 import com.google.android.exoplayer.text.TextRenderer;
 import com.google.android.exoplayer.upstream.BandwidthMeter;
@@ -61,7 +62,8 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
         HlsSampleSource.EventListener, DefaultBandwidthMeter.EventListener,
         MediaCodecVideoTrackRenderer.EventListener, MediaCodecAudioTrackRenderer.EventListener,
         StreamingDrmSessionManager.EventListener, DashChunkSource.EventListener, TextRenderer,
-        MetadataRenderer<Map<String, Object>>, DebugTextViewHelper.Provider {
+        MetadataRenderer<List<Id3Frame>>, DebugTextViewHelper.Provider {
+
 
     /**
      * Builds renderers for the player.
@@ -167,7 +169,7 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
      * A listener for receiving ID3 metadata parsed from the media stream.
      */
     public interface Id3MetadataListener {
-        void onId3Metadata(Map<String, Object> metadata);
+        void onId3Metadata(List<Id3Frame> metadata);
     }
 
     // Constants pulled into this class for convenience.
@@ -581,17 +583,22 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
     }
 
     @Override
-    public void onMetadata(Map<String, Object> metadata) {
+    public void onMetadata(List<Id3Frame> metadata) {
         if (id3MetadataListener != null && getSelectedTrack(TYPE_METADATA) != TRACK_DISABLED) {
             id3MetadataListener.onId3Metadata(metadata);
         }
     }
 
     @Override
-    public void onAvailableRangeChanged(TimeRange availableRange) {
+    public void onAvailableRangeChanged(int sourceId, TimeRange availableRange) {
         if (infoListener != null) {
             infoListener.onAvailableRangeChanged(availableRange);
         }
+    }
+
+    @Override
+    public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
+
     }
 
     @Override
