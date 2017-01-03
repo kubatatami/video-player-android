@@ -61,9 +61,10 @@ import com.google.android.exoplayer.MediaFormat;
 import com.google.android.exoplayer.audio.AudioCapabilities;
 import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
 import com.google.android.exoplayer.drm.UnsupportedDrmException;
-import com.google.android.exoplayer.metadata.GeobMetadata;
-import com.google.android.exoplayer.metadata.PrivMetadata;
-import com.google.android.exoplayer.metadata.TxxxMetadata;
+import com.google.android.exoplayer.metadata.id3.GeobFrame;
+import com.google.android.exoplayer.metadata.id3.Id3Frame;
+import com.google.android.exoplayer.metadata.id3.PrivFrame;
+import com.google.android.exoplayer.metadata.id3.TxxxFrame;
 import com.google.android.exoplayer.text.CaptionStyleCompat;
 import com.google.android.exoplayer.text.Cue;
 import com.google.android.exoplayer.text.SubtitleLayout;
@@ -476,8 +477,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private static String buildTrackIdString(MediaFormat format) {
-        return format.trackId == MediaFormat.NO_VALUE ? ""
-                : String.format(Locale.US, " (%d)", format.trackId);
+        return format.trackId;
     }
 
     private boolean onTrackItemClick(MenuItem item, int type) {
@@ -540,23 +540,23 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback,
     // DemoPlayer.MetadataListener implementation
 
     @Override
-    public void onId3Metadata(Map<String, Object> metadata) {
-        for (Map.Entry<String, Object> entry : metadata.entrySet()) {
-            if (TxxxMetadata.TYPE.equals(entry.getKey())) {
-                TxxxMetadata txxxMetadata = (TxxxMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: description=%s, value=%s",
-                        TxxxMetadata.TYPE, txxxMetadata.description, txxxMetadata.value));
-            } else if (PrivMetadata.TYPE.equals(entry.getKey())) {
-                PrivMetadata privMetadata = (PrivMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: owner=%s",
-                        PrivMetadata.TYPE, privMetadata.owner));
-            } else if (GeobMetadata.TYPE.equals(entry.getKey())) {
-                GeobMetadata geobMetadata = (GeobMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
-                        GeobMetadata.TYPE, geobMetadata.mimeType, geobMetadata.filename,
+    public void onId3Metadata(List<Id3Frame> metadata) {
+        for (Id3Frame frame : metadata) {
+            if (frame instanceof TxxxFrame) {
+                TxxxFrame txxxMetadata = (TxxxFrame) frame;
+                Log.i(TAG, String.format("ID3 TimedMetadata Txxx: description=%s, value=%s",
+                        txxxMetadata.description, txxxMetadata.value));
+            } else if (frame instanceof PrivFrame) {
+                PrivFrame privMetadata = (PrivFrame) frame;
+                Log.i(TAG, String.format("ID3 TimedMetadata Priv: owner=%s",
+                        privMetadata.owner));
+            } else if (frame instanceof GeobFrame) {
+                final GeobFrame geobMetadata = (GeobFrame) frame;
+                Log.i(TAG, String.format("ID3 TimedMetadata Geob: mimeType=%s, filename=%s, description=%s",
+                        geobMetadata.mimeType, geobMetadata.filename,
                         geobMetadata.description));
             } else {
-                Log.i(TAG, String.format("ID3 TimedMetadata %s", entry.getKey()));
+                Log.i(TAG, String.format("ID3 TimedMetadata %s", frame));
             }
         }
     }
